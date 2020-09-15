@@ -204,14 +204,18 @@ if __name__ == "__main__":
   acc_cmpltn = (np.sum(conf[1:, 1:])) / (np.sum(conf) - conf[0,0])
   mIoU_ssc = m_jaccard
 
+  iou_free = conf[0,0] / (np.sum(conf) - np.sum(conf[1:, 1:]))
+
   print("Precision =\t" + str(np.round(precision * 100, 2)) + '\n' +
         "Recall =\t" + str(np.round(recall * 100, 2)) + '\n' +
         "IoU Cmpltn =\t" + str(np.round(acc_cmpltn * 100, 2)) + '\n' +
+        "IoU Free =\t" + str(np.round(iou_free * 100, 2)) + '\n' +
         "mIoU SSC =\t" + str(np.round(mIoU_ssc * 100, 2)))
 
   # write "scores.txt" with all information
   results = {}
   results["iou_completion"] = float(acc_cmpltn)
+  results["iou_completion_free"] = float(iou_free)
   results["iou_mean"] = float(mIoU_ssc)
 
   for i, jacc in enumerate(class_jaccard):
@@ -221,3 +225,7 @@ if __name__ == "__main__":
   output_filename = os.path.join(args.output, 'scores.txt')
   with open(output_filename, 'w') as yaml_file:
     yaml.dump(results, yaml_file, default_flow_style=False)
+
+  # transpose conf matrix to have standard cols=pred, rows=true
+  output_filename_conf_matrix = os.path.join(args.output, 'confusion_completion.npy')
+  np.save(output_filename_conf_matrix, conf.transpose())
