@@ -5,7 +5,7 @@ import numpy as np
 import scipy.io as sio
 import yaml
 import os
-import time
+import pathlib
 
 epsilon = np.finfo(np.float32).eps
 
@@ -44,6 +44,19 @@ def load_gt_volume(filename):
 
   labels = np.fromfile(filename, dtype=np.uint16)
   invalid_voxels = unpack(np.fromfile(basename + ".invalid", dtype=np.uint8))
+
+  # try to read dynamic occlusion information
+  dynamic_occlusion_file = pathlib.Path(basename + ".dynamic_occlusion")
+  bin_file = pathlib.Path(basename + ".bin")
+  try:
+    dynamic_occ = unpack(np.fromfile(dynamic_occlusion_file, dtype=np.uint8))
+    input_voxels = unpack(np.fromfile(bin_file, dtype=np.uint8))
+
+    dynamic_occ[input_voxels != 0] = 0
+    invalid_voxels[dynamic_occ] = 1
+
+  except FileNotFoundError:
+    print("No dynamic occlusions.")
 
   return labels, invalid_voxels
 
