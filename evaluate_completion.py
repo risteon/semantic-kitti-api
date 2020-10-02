@@ -50,9 +50,9 @@ def load_gt_volume(filename):
   bin_file = pathlib.Path(basename + ".bin")
   try:
     dynamic_occ = unpack(np.fromfile(dynamic_occlusion_file, dtype=np.uint8))
-    # ignore input voxels, small difference.
-    # input_voxels = unpack(np.fromfile(bin_file, dtype=np.uint8))
-    # dynamic_occ[input_voxels != 0] = 0
+    # input voxels make a surprisingly large difference on small classes, e.g. person
+    input_voxels = unpack(np.fromfile(bin_file, dtype=np.uint8))
+    dynamic_occ[input_voxels != 0] = 0
     invalid_voxels[dynamic_occ != 0] = 1
 
   except FileNotFoundError:
