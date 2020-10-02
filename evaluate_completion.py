@@ -50,10 +50,10 @@ def load_gt_volume(filename):
   bin_file = pathlib.Path(basename + ".bin")
   try:
     dynamic_occ = unpack(np.fromfile(dynamic_occlusion_file, dtype=np.uint8))
-    input_voxels = unpack(np.fromfile(bin_file, dtype=np.uint8))
-
-    dynamic_occ[input_voxels != 0] = 0
-    invalid_voxels[dynamic_occ] = 1
+    # ignore input voxels, small difference.
+    # input_voxels = unpack(np.fromfile(bin_file, dtype=np.uint8))
+    # dynamic_occ[input_voxels != 0] = 0
+    invalid_voxels[dynamic_occ != 0] = 1
 
   except FileNotFoundError:
     print("No dynamic occlusions.")
@@ -172,6 +172,8 @@ if __name__ == "__main__":
 
   print("Evaluating: ", end="", flush=True)
   progress = 10
+
+  evaluation_pairs = sorted(evaluation_pairs)
 
   for i, f in enumerate(evaluation_pairs):
     if 100.0 * i / len(evaluation_pairs) >= progress:
